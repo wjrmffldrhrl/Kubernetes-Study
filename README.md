@@ -32,13 +32,13 @@
 
 
 # :ok_woman: 인원
-- 김정
-- 성주용
-- 손진현
-- 장우찬
-- 정민지
+- [김정](https://github.com/jungkim0829)
+- [성주용](https://github.com/tmznwnel00)
+- [손진현](https://github.com/ikswary)
+- [장우찬](https://github.com/RaymondWJang)
+- [정민지](https://github.com/work82mj)
 - [조승현](https://github.com/wjrmffldrhrl)
-- 황원규
+- [황원규](https://github.com/HwangWonGyu)
 
 
 # :calendar: 주간 계획
