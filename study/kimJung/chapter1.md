@@ -170,7 +170,7 @@ ex) UTS는 해당 네임스페이스 내에서 실행 중인 프로세스가 사
 
 #### 도커 이미지의 빌드, 배포, 실행
 
-![iamge_1](./image/chapter_1_6.png)
+![iamge_1](image/chapter_1_6.png)
 
 ---
 
