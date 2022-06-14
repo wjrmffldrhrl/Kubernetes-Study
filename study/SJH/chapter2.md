@@ -1,11 +1,11 @@
 # k8s 스터디 2주차
 ## 도커 background 실행 순서
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/3A863B4D-51B7-4159-8144-31715E7FF8AB.png)
+![](./image/chapter2.1.png)
 	1. Busybox:latest 이미지가 로컬에 존재하는지 체크
 	2. 없을 경우 도커 허브 레지스트리에서 이미지 다운로드
 	3. 컨테이너 생성
 	4. 컨테이너 내부에서 명령어 실행
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/4D9A78D5-DF18-457B-8047-94B15FA3D6C2.png)
+![](./image/chapter2.2.png)
 
 ## 이미지 버전 지정
 * 도커는 동일한 이미지에 여러개의 버전을 가질 수 있다
@@ -26,13 +26,13 @@ ENTRYPOINT ["node", "app.js"]  // 이미지 실행 시 수행될 명령어
 ## 이미지 빌드
 명령어 docker build -t {image_name}
 
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/8C381182-979E-4F13-A6B9-FB35BFAC25F6.png)
+![](./image/chapter2.3.png)
 
 빌드 프로세스는 도커 클라이언트가 아닌 데몬에서 진행된다
 그렇기 때문에 데몬이 로컬에 실행 중이지 않을경우 빌드 디렉토리의 크기에 따라 업로드 시간에 차이가 발생한다
 
 ### 이미지 레이어 
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/AAB126F8-AA3B-4FBC-ADCB-4E6D4D864BF5.png)
+![](./image/chapter2.4.png)
 
 ## 이미지 실행
 명령어 
@@ -61,7 +61,7 @@ docker rm {container_name}  // 컨테이너 삭제
 * 다중 노드 클러스터
 	* GCE, ACE, EKS등
 
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/B187C7C4-81AC-4CC7-8198-B0FA65D4A58C.png)
+![](./image/chapter2.5.png)
 
 
 ### 쿠버네티스 앱 실행
@@ -72,7 +72,7 @@ kubectl run {app_name} --image={image_path} --port=8080 --generator-run/v1
 	* --image : 이미지 명시
 	* -port : 컨테이너의 메인 프로세스가 대기할 port
 	* --generator : 디플로이먼트 대신 레플리케이션 컨트롤러(레플리카셋) 생성
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/65B99851-D0A5-4C87-B4F4-E1E19DB70711.png)
+![](./image/chapter2.6.png)
 
 
 ### 파드
@@ -80,7 +80,7 @@ kubectl run {app_name} --image={image_path} --port=8080 --generator-run/v1
 * 하나 이상의 밀접한 컨테이너 그룹으로 같은 워커 노드에서 같은 네임스페이스로 함께 실행된다
 * 각 파드는 자체 IP, 호스트 이름, 프로세스 등이 있는 논리적으로 분리된 머신
 
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/6B19E660-5392-4C42-B829-67854401D83D.png)
+![](./image/chapter2.7.png)
 
 ### 파드 접근
  파드는 각각 private ip 를 갖기 때문에 외부 접근을 위해서는 서비스 오브젝트를 통해 노출해야한다.
@@ -91,7 +91,7 @@ kubectl run {app_name} --image={image_path} --port=8080 --generator-run/v1
 kubectl expost rc {pod_name} --type=LoadBalancer --name {service_name}  // rc = replicationcontroller
 ```
 
-![](k8s%20%E1%84%89%E1%85%B3%E1%84%90%E1%85%A5%E1%84%83%E1%85%B5%202%E1%84%8C%E1%85%AE%E1%84%8E%E1%85%A1/B8DB743B-8788-4F35-9FD2-C2D25B40703F.png)
+![](./image/chapter2.8.png)
 서비스 오브젝트가 생성되면 External-IP를 통해 파드와 통신할 수 있다
 
 
