@@ -3,7 +3,7 @@
 
 ### 도커설치와 Hello World 컨테이너 실행하기
 
-#### Hello World 컨테이너 실
+#### Hello World 컨테이너 실행
 ```shell
 $ docker run busybox echo "Hello world"
 ```
@@ -21,7 +21,7 @@ Hello world
 #### 백그라운드에 일어난 동작 이해하기
 
 docker run 명령을 수행하면
-1. `busybox:latest` 이미지가 로컬 컴퓨터에 존재하는지 체크하고 존재하지 않으면 http://docker.io의 도커허브 레지스토리에서 이미지를 다운
+1. `busybox:latest` 이미지가 로컬 컴퓨터에 존재하는지 체크하고 존재하지 않으면 http://docker.io 의 도커허브 레지스토리에서 이미지를 다운
 2. 이미지로부터 컨테이너를 생성하고 내부의 명령어 실행
 
 > 위 경우에는 echo 명령어는 표준 출력(STD OUT)으로 출력한 후 프로세스가 종료후 컨테이너도 중지된다.
