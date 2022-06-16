@@ -1,2 +1,1 @@
-쿠버네티스 인 액션 2장 정리
-https://beststar-1.tistory.com/44
+[쿠버네티스 인 액션 2장 정리](https://beststar-1.tistory.com/44)
