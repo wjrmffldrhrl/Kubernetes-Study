@@ -1,0 +1,11 @@
+apiVersion: v1 # 디스크립터는 API 버전 v1을 준수한다.
+kind: Pod # 리소스 종류
+metadata:
+  name: kubia-manual # 파드 이름
+spec:
+  containers:
+  - image: luksa/kubia # 컨테이너 이미지
+    name: kubia # 컨테이너 이름
+    ports:
+    - containerPort: 8080 # 애플리케이션이 수신하는 포트
+      protocol: TCP
