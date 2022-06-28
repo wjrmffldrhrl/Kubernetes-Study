@@ -211,7 +211,7 @@ RC를 완전히 대체하게 될 레플리카셋이 도입됐다.
 
 ## 레플리카셋 정의
 ```yaml
-apiVersion: apps/v1beta2
+apiVersion: apps/v1beta2 # 레플리카셋은 API 그룹 apps, 버전 v1beta2에 속한다.
 kind: ReplicaSet
 metadata:
   name: kubia
@@ -219,7 +219,7 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: kubia
+      app: kubia # 레플리케이션컨트롤러와 유사한 matchLabels
   template:
     metadata:
       labels:
@@ -230,5 +230,195 @@ spec:
         image: luksa/kubia
 ```
 
+## 레플리카셋 생성 및 검사
+```sh
+$ k create -f kubia-replicaset.yaml
+```
 
-167 - 203
+```sh
+$ k get rs
+NAME    DESIRED   CURRENT   READY   AGE
+kubia   3         3         3       3s
+```  
+
+## 레플리카셋의 더욱 표현적인 셀렉터 사용
+```yaml
+apiVersion: apps/v1beta2
+kind: ReplicaSet
+metadata:
+  name: kubia
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app        # 파드의 키가 app인 레이블을 포함해야 한다.
+        operator: In
+        values:         # 레이블의 값은 kubia여야 한다.
+         - kubia
+  template:
+    metadata:
+      labels:
+        app: kubia
+    spec:
+      containers:
+      - name: kubia
+        image: luksa/kubia
+```
+
+셀렉터에 표현식을 추가할 수 있다.  
+- In : 레이블의 값이 지정된 값 중 하나와 일치해야 한다.
+- NotIn : 레이블의 값이 지정된 값과 일치하지 않아야 한다.
+- Exists : 지정된 키를 가진 레이블이 존재해야 한다.
+- DoesNotExist : 지정된 키를 가진 레이블이 포함돼 있지 않아야 한다.  
+
+
+# 데몬셋
+클러스터의 모든 노드에, 노드당 하나의 파드만 실행되길 원하는 경우가 있을 수 있다.  
+- 인프라 관련 파드가 이런 경우이다.
+- 예를 들면 모든 노드에서 로그 수집 및 리소스 모니터링을 수행하는 경우가 있다.
+![image_6](../images/chapter_4_6.png)  
+
+데몬셋 오브젝트는 레플리케이션컨트롤러 또는 레플리카셋과 매우 유사하다.  
+- 레플리카셋이 클러스터에 원하는 수의 파드를 랜덤하게 배포하는 반면 데몬셋은 원하는 복제본 수라는 개념이 없으며 각 노드에서 파드가 하나 씩 실행중인지 확인한다.
+
+데몬셋 정의의 일부인 파드 템플릿에서 node-Selector 속성을 지정하면 특정 레이블이 존재하는 노드에만 파드를 배포한다.  
+![image_7](../images/chapter_4_7.png)  
+
+```yaml
+apiVersion: apps/v1beta2
+kind: DaemonSet
+metadata:
+  name: ssd-monitor
+spec:
+  selector:
+    matchLabels:
+      app: ssd-monitor
+  template:
+    metadata:
+      labels:
+        app: ssd-monitor
+    spec:
+      nodeSelector:
+        disk: ssd  # 파드 템플릿에 노드 셀렉터 선언
+      containers:
+      - name: main
+        image: luksa/ssd-monitor
+
+```
+
+# 완료 가능한 단일 태스크를 수행하는 파드
+## 잡
+쿠버네티스 잡 리소스는 작업을 오나료한 후에는 종료 되는 태스크만 실행하는 상황을 해결해준다.  
+
+잡은 파드의 컨테이너 내부에서 실행 중인 프로세스가 성공적으로 완료되면 컨테이너를 다시 시작하지 않는 파드를 실행할 수 있다.  
+
+외부 요인(노드 장애)이나 프로세스 자체에 장애가 발생한 경우에 재실행 할 수 있다.  
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: batch-job
+spec:  
+  template:
+    metadata:
+      labels:
+        app: batch-job
+    spec:
+      restartPolicy: OnFailure # 잡은 기본 재시작 정책(Always)을 사용할 수 없다.
+      containers:
+      - name: main
+        image: luksa/batch-job
+
+```
+파드 스펙에서는 컨테이너에서 실행 중인 프로세스가 종료될 때 쿠버네티스가 수행할 작업을 지정할 수 있다.  
+
+restartPolicy의 기본값은 Always이지만, 잡 파드는 무한정 실행하지 않으므로 기본 정책을 사용할 수 없다.  
+- OnFailure나 Never로 명시적으로 설정해야 한다.  
+
+`k create` 명령으로 잡 생성시 파드가 바로 시작된다.  
+작업이 완료된 이후에는 STATUS가 Completed로 변경되고 종료된다.  
+
+## 잡에서 여러 파드 인스턴스 실행 
+
+### 순차적으로 실행
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: multi-completion-batch-job
+spec:
+  completions: 5  # 해당 잡은 다섯 개의 파드를 순차적으로 실행한다.
+  template:
+    metadata:
+      labels:
+        app: batch-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: main
+        image: luksa/batch-job
+
+``` 
+
+### 병렬로 잡 실행
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: multi-completion-batch-job
+spec:
+  completions: 5 # 해당 잡은 다섯 개의 파드를 성공적으로 완료해야한다.
+  parallelism: 2 # 두 개까지 병렬로 실행될 수 있다.
+  template:
+    metadata:
+      labels:
+        app: batch-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: main
+        image: luksa/batch-job
+```  
+
+### 잡 스케일링
+잡이 실행되는 동안 parallelism 속성을 변경할 수 있다.  
+
+```sh
+$ k scale job multi-completion-batch-job --replicas 3
+```  
+
+파드 스팩에 `activeDeadlineSeconds` 속성을 정의해 파드의 실행 시간을 제한하여 무한 루프 상황에 빠졌을 때 파드를 종료시킬 수 있다.  
+
+# 주기적으로 실행되는 잡
+쿠버네티스에서의 크론 작업은 크론잡 리소스를 만들어 구성한다.  
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: batch-job-every-fifteen-minutes
+spec:
+  schedule: "0,15,30,45 * * * *" # 매일 매시간 0, 15, 30, 45분에 실행
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: periodic-batch-job
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: main
+            image: luksa/batch-job
+```
+
+스케줄은 왼쪽에서 오른쪽으로 다섯 개의 항목을 가지고 있다.
+- 분
+- 시
+- 일
+- 월
+- 요일  
+
+잡이나 파드가 상대적으로 늦게 생성되고 실행되는 경우가 있는데, 예정된 시간에서 크게 벗어나면 안되는 경우 `startingDeadlineSeconds` 필드를 크론잡 스팩에 추가하여 데드라인을 설정할 수 있다.  
+

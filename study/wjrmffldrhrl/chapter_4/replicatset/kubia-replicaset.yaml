@@ -1,0 +1,17 @@
+apiVersion: apps/v1beta2 # 레플리카셋은 API 그룹 apps, 버전 v1beta2에 속한다.
+kind: ReplicaSet
+metadata:
+  name: kubia
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kubia # 레플리케이션컨트롤러와 유사한 matchLabels
+  template:
+    metadata:
+      labels:
+        app: kubia
+    spec:
+      containers:
+      - name: kubia
+        image: luksa/kubia
