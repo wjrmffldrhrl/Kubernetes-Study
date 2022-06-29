@@ -1,6 +1,6 @@
 # Ch4. 레플리케이션과 그 밖의 컨트롤러: 관리되는 파드 배포
 
-[*ReplicaSet](https://kubernetes.io/ko/docs/concepts/workloads/controllers/replicaset/)을 구성하는 [Deployment](https://kubernetes.io/ko/docs/concepts/workloads/controllers/deployment/)가 현재 권장하는 레플리케이션 설정 방법임*
+*[ReplicaSet](https://kubernetes.io/ko/docs/concepts/workloads/controllers/replicaset/)을 구성하는 [Deployment](https://kubernetes.io/ko/docs/concepts/workloads/controllers/deployment/)가 현재 권장하는 레플리케이션 설정 방법임*
 
 - 쿠버네티스에서는 수동으로 파드를 생성하고 관리하기보다는 디플로이먼트와 같은 유형의 리소스를 생성해 실제 파드를 생성하고 관리하게 됨
     - 수동으로 파드를 관리하게 될 경우, 노드 전체에 장애가 발생하면 노드에 있는 파드가 유실되며, 새로운 파드로 대체되지 않음
