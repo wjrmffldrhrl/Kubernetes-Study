@@ -256,10 +256,10 @@ spec:
 
 
 해당 서비스는 아래의 방법들로 액세스할 수 있다.
-- <CLUSTER-IP>:80
-- <FIRST-NODE-IP>:30123
-- <SECOND-NODE-IP>:30123
-- ETC
+- `<CLUSTER-IP>:80`
+- `<FIRST-NODE-IP>:30123`
+- `<SECOND-NODE-IP>:30123`
+- `ETC`
 
 ![image_6](../images/chapter_5_6.png)  
 - 첫 번째 노드의 30123 포트로 수신된 연결이 두 번쨰 노드의 실행중인 파드로 연결될 수 있다.  
