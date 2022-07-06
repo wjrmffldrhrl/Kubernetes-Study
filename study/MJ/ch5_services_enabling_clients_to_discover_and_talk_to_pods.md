@@ -181,7 +181,7 @@ KUBIA_SERVICE_PORT=80
 
 ### 서비스 IP에  핑을 할 수 없는 이유
 
-- curl은 동작하지만 ping은 응답이 없는데, 이는 서비스의 클러스터 IP가 가상 IP이므로 서비스 포트와 결합된 경우에만 의가 있기 때문
+- curl은 동작하지만 ping은 응답이 없는데, 이는 서비스의 클러스터 IP가 가상 IP이므로 서비스 포트와 결합된 경우에만 의미가 있기 때문
     
     ← 11장에서 서비스의 동작 방식과 연결
     
@@ -348,7 +348,7 @@ kubia-loadbalancer    10.111.245.223    130.211.53.173    80:32143/TCP  1m
     - eg)
         
         ```yaml
-        spece:
+        spec:
           externalTrafficPolicy: Local
         ```
         
