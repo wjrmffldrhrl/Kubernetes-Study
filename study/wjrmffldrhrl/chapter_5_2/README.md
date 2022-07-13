@@ -196,3 +196,21 @@ ServiceTypes는 원하는 서비스 종류를 지정할 수 있도록 해준다.
 - ExternalName  
   - 서비스를 ExternalName 필드의 콘텐츠 (ex: foo.bar.example.com)에 매핑한다.
 
+
+# FQDN이란
+전체 주소 도메인 네임, 절대 도메인 네임이라고 부르며 호스트 이름과 도메인 이름을 포함한 전체 도메인 이름을 일컫는 용어이다.  
+
+예를 들어 `www.superuser.co.kr`이란 웹주소에서 `www`는 호스트 이름을 의미하며 `superuser.co.kr`은 도메인을 의미한다.  
+
+여기서 FQDN은 호스트와 도메인을 모두 포함한 `www.superuser.co.kr`이 된다.  
+
+반대로 PQDN은 하위 일부 경로만으로 식별 가능하게 하는 이름을 의미한다.
+- 쿠버네티스에서 같은 네임스페이스의 파드를 찾을때 사용 가능
+
+# nslookup이란
+네임서버에 대한 여러가지들을 조회 할 수 있는 명령어  
+- ex) nslookup naver.com
+
+# 서비스 IP에 핑을 할 수 없는 이유
+서비스의 클러스터 IP는 가상 IP이기 때문에 포트와 결합된 경우에만 의미가 있다.  
+
