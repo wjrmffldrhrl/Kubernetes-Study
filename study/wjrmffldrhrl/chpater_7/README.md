@@ -297,5 +297,133 @@ defaultMode 속성을 설정해 변경할 수 있다.
     configMap:
       name: fortune-config
       defaultMode: 0660
+```  
+
+## 애플리케이션을 재시작하지 않고 애플리케이션 설정 업데이트
+환경변수 또는 명령줄 인수를 설정 소스로 사용할 때의 단점은 프로세스가 실행되고 있는 동안에는 업데이트를 할 수 없다는 점이다.  
+
+컨피그맵을 사용해 볼륨으로 노출하면 파드를 다시 만들거나 컨테이너를 다시 실행할 필요 없이 설정을 업데이트할 수 있다.  
+
+- 컨피그맵을 업데이트하면, 이를 참조하는 모든 볼륨의 파일이 업데이트 된다.  
+- 이것을 감지하고 다시 로드하는 것은 프로세스에 달려있다.
+
+### 파일이 한꺼번에 업데이트되는 원리 이해하기  
+쿠버네티스는 심볼릭 링크를 사용해 모든 파일이 한 번에 업데이트 되도록한다.  
+
+컨피그맵이 업데이트되면 쿠버네티스는 새 디렉터리를 생성하고 모든 파일을 해당 디렉터리에 쓴 다음 기존의 심볼릭 링크가 새 디렉터리를 가리키디록 해 모든 파일을 한번에 효과적으로 변경한다.  
+
+그러나, 전체 볼륨 대신 단일 파일을 컨테이너에 마운트한 경우 파일이 업데이트 되지 않는다.  
+
+이 경우 전체 볼륨을 다른 디렉터리에 마운트한 다음 해당 파일을 가리키는 심볼릭 링크를 생성하는 방법으로 해결할 수 있다.  
+- 컨테이너 이미지에서 심볼릭 링크를 만들거나, 컨테이너를 시작할 때 심볼릭 링크를 만들 수 있다.  
+
+애플리케이션이 설정을 다시 읽는 기능을 지원하지 않는 경우에는 컨피그맵을 변경하는 것이 심각한 문제로 이어질 수 있다.  
+
+파드 컨테이너가 새롭게 시작되면 새로운 프로세스는 새로운 설정을 보게되고, 애플리케이션들의 설정값이 파악이 되지 않는 경우가 발생한다.  
+
+따라서 이미 존재하는 컨피그맵을 수정하는 것은 좋은 방법이 아니다.  
+
+# 시크릿으로 민감한 데이터를 컨테이너에 전달  
+
+설정 안에는 보안이 유지되어야 하는 자격증명과 개인 암호화 키와 같은 민감한 정보도 포함되어있다.  
+이러한 정보를 보관하고 배포하기 위해 쿠버네티스는 시크릿이라는 별도 오브젝트를 제공한다.  
+시크릿은 키-값 쌍을 가진 맵으로 컨피그맵과 매우 비슷하다.  
+
+쿠버네티스는 시크릿에 접근해야 하는 파드가 실행되고 있는 노드에만 개별 시크릿을 배포해 시크릿을 안전하게 유지한다.  
+또한 노드 자체적으로 시크릿을 항상 메모리에만 저장되게 하고 물리 저장소에 기록되지 않도록 한다.  
+
+## 기본 토큰 시크릿
+모든 파드에는 secret 볼륨이 자동으로 연결돼 있다.  
+
+```yaml
+Volumes:
+  default-token-cfee9:
+  Type: Secret (a volume populated by a Secret)
+  SecretName: default-token-cfee9
 ```
-305 - 352
+
+![image_7](../images/chapter_7_7.png)  
+
+
+## 시크릿 생성
+kubectl create secret 명령으로 세 가지 파일에서 시크릿을 만들 수 있다.
+
+```sh
+kubectl create secret generic fortune-https --from-file=https.key
+➥ --from-file=https.cert --from-file=foo
+secret "fortune-https" created
+```
+- fortune-https 이름을 가진 generic 시크릿 생성  
+
+
+## 컨피그맵과 시크릿 비교
+```sh
+$ kubectl get secret fortune-https -o yaml
+apiVersion: v1
+data:
+ foo: YmFyCg==
+ https.cert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCekNDQ...
+ https.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcE...
+kind: Secret
+...
+```
+
+```sh
+$ kubectl get configmap fortune-config -o yaml
+apiVersion: v1
+data:
+ my-nginx-config.conf: |
+ server {
+ ...
+ }
+ sleep-interval: |
+ 25
+kind: ConfigMap
+...
+```
+시크릿 항목의 내용은 Base64 인코딩 문자열로 표시되고, 컨피그맵의 내용은 일반 텍스트로 표시된다.
+- 그래서 컨피그맵 리소스가 추가되어 제공되고 있다.  
+
+## 파드에서 시크릿 사용
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-https
+spec:
+  containers:
+  - image: luksa/fortune:env
+    ...
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    ...
+    - name: certs
+      mountPath: /etc/nginx/certs/ # 시크릿 볼륨 마운트
+      readOnly: true
+    ports:
+    - containerPort: 80
+    - containerPort: 443
+  volumes:
+    .....
+  - name: certs
+    secret:
+      secretName: fortune-https # fortune-https 시크릿을 참조하도록 시크릿 볼륨 정의
+```
+![image_8](../images/chapter_7_8.png)  
+
+secret 볼륨은 시크릿 파일을 저장하는데 인메모리 파일시스템을 사용한다. 
+
+볼륨을 사용하는 대신 시크릿의 개별 항목을 환경변수로 노출할 수 있다. 
+
+```yaml
+env:
+- name: FOO_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: fortune-https # 키를 갖고 있는 시크릿 이름
+      key: foo # 노출할 시크릿 키 이름
+```
+
+그러나 환경변수로 시크릿을 전달하면 로그에 환경변수를 남겨 의도치 않게 시크릿을 노출할 수 있다.  
