@@ -29,8 +29,8 @@
 
 
 # :ok_woman: 인원
-- [김정](https://github.com/jungkim0829)
-- [성주용](https://github.com/tmznwnel00)
+- ~~[김정](https://github.com/jungkim0829)~~
+- ~~[성주용](https://github.com/tmznwnel00)~~
 - [손진현](https://github.com/ikswary)
 - [정민지](https://github.com/work82mj)
 - [조승현](https://github.com/wjrmffldrhrl)
